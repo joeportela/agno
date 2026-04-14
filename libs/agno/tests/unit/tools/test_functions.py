@@ -206,7 +206,9 @@ def test_function_process_entrypoint_with_user_input_excludes_run_context():
         """
         return f"{param1}-{param2}"
 
-    func = Function(name="test_func", entrypoint=test_func, requires_user_input=True, user_input_fields=["param1"])
+    func = Function(
+        name="test_func", entrypoint=test_func, requires_user_input=True, user_input_fields=["param1"]
+    )
     func.process_entrypoint()
 
     assert func.user_input_schema is not None
@@ -230,7 +232,9 @@ def test_function_process_entrypoint_with_user_input_excludes_all_framework_para
         """
         return param1
 
-    func = Function(name="test_func", entrypoint=test_func, requires_user_input=True, user_input_fields=[])
+    func = Function(
+        name="test_func", entrypoint=test_func, requires_user_input=True, user_input_fields=[]
+    )
     func.process_entrypoint()
 
     assert func.user_input_schema is not None
@@ -251,7 +255,9 @@ def test_function_process_entrypoint_with_user_input_excludes_by_type():
         """
         return param1
 
-    func = Function(name="test_func", entrypoint=test_func, requires_user_input=True, user_input_fields=["param1"])
+    func = Function(
+        name="test_func", entrypoint=test_func, requires_user_input=True, user_input_fields=["param1"]
+    )
     func.process_entrypoint()
 
     assert func.user_input_schema is not None
