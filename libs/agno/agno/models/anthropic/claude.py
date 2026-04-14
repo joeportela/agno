@@ -333,9 +333,12 @@ class Claude(Model):
         """Return True when this request will send Anthropic's ``output_format`` param.
 
         Anthropic rejects ``citations`` + ``output_format`` with a 400, so document
-        citations must be suppressed whenever this returns True.
+        citations must be suppressed whenever this returns True. Delegates to
+        ``_build_output_format`` so the two can never disagree — in particular,
+        ``response_format={"type": "json_object"}`` builds nothing and therefore
+        does not trigger the conflict.
         """
-        return response_format is not None and self.supports_native_structured_outputs
+        return self._build_output_format(response_format) is not None
 
     def _validate_structured_outputs_usage(
         self,

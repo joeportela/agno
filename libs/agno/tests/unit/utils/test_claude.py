@@ -118,14 +118,16 @@ class TestFormatFileForMessage:
 
         assert "citations" not in result
 
-    def test_file_citations_true_overrides_caller_default_false(self):
-        """Per-file opt-in wins over caller default False."""
+    def test_caller_false_is_a_ceiling_even_when_file_requests_citations(self):
+        """Safety: File(citations=True) must NOT re-enable citations when the caller
+        has disabled them (e.g. structured output is active — re-enabling would
+        reintroduce the very 400 this feature exists to prevent)."""
         result = _format_file_for_message(
             File(content=b"fake", mime_type="application/pdf", citations=True),
             enable_citations=False,
         )
 
-        assert result["citations"] == {"enabled": True}
+        assert "citations" not in result
 
     def test_citations_not_attached_to_anthropic_uploaded_file(self):
         """Case 0 (external file) has never attached citations — regression guard."""

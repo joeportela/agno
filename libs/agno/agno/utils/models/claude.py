@@ -207,13 +207,21 @@ def _format_file_for_message(file: File, enable_citations: bool = True) -> Optio
 
     Args:
         file: The file to format.
-        enable_citations: Default for whether to attach ``citations: {enabled: True}``
-            to the document block. Individual files can still override this via
-            ``File.citations``. Anthropic rejects citations alongside structured
-            output, so callers must pass ``False`` when ``response_format`` is set.
+        enable_citations: Caller-level ceiling. When False, citations are suppressed
+            regardless of ``File.citations``. When True, ``File.citations`` may opt an
+            individual file out.
     """
-    # Per-file override takes precedence over the caller default.
-    citations_on = file.citations if file.citations is not None else enable_citations
+    if not enable_citations:
+        citations_on = False
+        if file.citations is True:
+            identifier = file.filename or file.url or (str(file.filepath) if file.filepath else None) or file.id or "<unnamed>"
+            log_warning(
+                f"File.citations=True ignored for {identifier}: request-level citations are "
+                "disabled for this call (structured output is active and Anthropic rejects "
+                "citations alongside output_format)."
+            )
+    else:
+        citations_on = file.citations if file.citations is not None else True
 
     mime_mapping: dict[str, str] = {
         "application/pdf": "base64",
@@ -341,8 +349,7 @@ def format_messages(
         append_trailing_user_message: If True, append a dummy user message when the conversation
             ends with an assistant turn. Required for models that do not support assistant prefill.
         trailing_user_message_content: The text content of the injected trailing user message.
-        enable_citations: Default for document citation attachment. Callers should pass ``False``
-            when using structured output — Anthropic rejects citations + output_format with a 400.
+        enable_citations: Default for document citation attachment.
 
     Returns:
         Tuple[List[Dict[str, Union[str, list]]], str]: A tuple containing the list of API messages and the concatenated system messages.
