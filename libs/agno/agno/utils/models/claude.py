@@ -214,7 +214,9 @@ def _format_file_for_message(file: File, enable_citations: bool = True) -> Optio
     if not enable_citations:
         citations_on = False
         if file.citations is True:
-            identifier = file.filename or file.url or (str(file.filepath) if file.filepath else None) or file.id or "<unnamed>"
+            identifier = (
+                file.filename or file.url or (str(file.filepath) if file.filepath else None) or file.id or "<unnamed>"
+            )
             log_warning(
                 f"File.citations=True ignored for {identifier}: request-level citations are "
                 "disabled for this call (structured output is active and Anthropic rejects "

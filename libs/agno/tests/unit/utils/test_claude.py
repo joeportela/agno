@@ -92,9 +92,7 @@ class TestFormatFileForMessage:
         p = tmp_path / "doc.pdf"
         p.write_bytes(b"%PDF-1.4 fake")
 
-        result = _format_file_for_message(
-            File(filepath=str(p), mime_type="application/pdf"), enable_citations=False
-        )
+        result = _format_file_for_message(File(filepath=str(p), mime_type="application/pdf"), enable_citations=False)
 
         assert "citations" not in result
 
@@ -140,9 +138,7 @@ class TestFormatFileForMessage:
         assert "citations" not in result
 
     def test_url_source_citations_suppressed_when_disabled(self):
-        result = _format_file_for_message(
-            File(url="https://example.com/doc.pdf"), enable_citations=False
-        )
+        result = _format_file_for_message(File(url="https://example.com/doc.pdf"), enable_citations=False)
 
         assert result["source"]["type"] == "url"
         assert "citations" not in result

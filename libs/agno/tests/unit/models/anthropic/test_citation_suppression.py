@@ -110,7 +110,7 @@ class TestClaudeInvokeOmitsCitationsUnderStructuredOutput:
         # can consume without blowing up. We only care about what we *sent*, not the reply.
         create_mock = MagicMock(
             return_value=SimpleNamespace(
-                content=[SimpleNamespace(type="text", text="{\"answer\": \"ok\"}", citations=None)],
+                content=[SimpleNamespace(type="text", text='{"answer": "ok"}', citations=None)],
                 stop_reason="end_turn",
                 usage=SimpleNamespace(
                     input_tokens=1,
