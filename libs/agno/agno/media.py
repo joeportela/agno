@@ -393,6 +393,10 @@ class File(BaseModel):
     external: Optional[Any] = None
     format: Optional[str] = None  # E.g. `pdf`, `txt`, `csv`, `xml`, etc.
     name: Optional[str] = None  # Name of the file, mandatory for AWS Bedrock document input
+    # Anthropic document citations. None = provider default (on for Claude).
+    # Set to False to suppress — required when using structured output (Anthropic rejects
+    # citations + output_format with a 400).
+    citations: Optional[bool] = None
 
     @model_validator(mode="before")
     @classmethod

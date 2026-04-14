@@ -86,3 +86,61 @@ class TestFormatFileForMessage:
 
         assert result["source"]["data"] == csv_content
         assert result["source"]["data"] != base64.standard_b64encode(csv_content.encode()).decode()
+
+    def test_enable_citations_false_omits_citations_block(self, tmp_path):
+        """Anthropic rejects citations + output_format; caller must be able to suppress."""
+        p = tmp_path / "doc.pdf"
+        p.write_bytes(b"%PDF-1.4 fake")
+
+        result = _format_file_for_message(
+            File(filepath=str(p), mime_type="application/pdf"), enable_citations=False
+        )
+
+        assert "citations" not in result
+
+    def test_enable_citations_default_true_adds_citations_block(self, tmp_path):
+        p = tmp_path / "doc.pdf"
+        p.write_bytes(b"%PDF-1.4 fake")
+
+        result = _format_file_for_message(File(filepath=str(p), mime_type="application/pdf"))
+
+        assert result["citations"] == {"enabled": True}
+
+    def test_file_citations_false_overrides_caller_default(self, tmp_path):
+        """Per-file opt-out wins over the caller default."""
+        p = tmp_path / "doc.pdf"
+        p.write_bytes(b"%PDF-1.4 fake")
+
+        result = _format_file_for_message(
+            File(filepath=str(p), mime_type="application/pdf", citations=False),
+            enable_citations=True,
+        )
+
+        assert "citations" not in result
+
+    def test_file_citations_true_overrides_caller_default_false(self):
+        """Per-file opt-in wins over caller default False."""
+        result = _format_file_for_message(
+            File(content=b"fake", mime_type="application/pdf", citations=True),
+            enable_citations=False,
+        )
+
+        assert result["citations"] == {"enabled": True}
+
+    def test_citations_not_attached_to_anthropic_uploaded_file(self):
+        """Case 0 (external file) has never attached citations — regression guard."""
+
+        class _Ext:
+            id = "file_123"
+
+        result = _format_file_for_message(File(external=_Ext()))
+
+        assert "citations" not in result
+
+    def test_url_source_citations_suppressed_when_disabled(self):
+        result = _format_file_for_message(
+            File(url="https://example.com/doc.pdf"), enable_citations=False
+        )
+
+        assert result["source"]["type"] == "url"
+        assert "citations" not in result
